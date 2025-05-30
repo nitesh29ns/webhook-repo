@@ -1,9 +1,10 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template, render_template_string
 from ..extensions import mongo
+from datetime import datetime
+from dateutil.parser import parse as parse_datetime
 
 
 webhook = Blueprint('Webhook', __name__, url_prefix='/webhook')
-
 
 @webhook.route('/receiver', methods=["POST"])
 def receiver():
@@ -29,16 +30,6 @@ def receiver():
             else:
                 from_branch = "unknown"
 
-            response_msg = f"{author} merged branch '{from_branch}' to '{to_branch}' on {timestamp}"
-
-            mongo.db.events.insert_one({
-                "request_id" : request_id,
-                "action": "merge",
-                "author": author,
-                "from_branch": from_branch,
-                "to_branch": to_branch,
-                "timestamp": timestamp
-            })
         else:
             response_msg = f"{author} pushed to {to_branch} on {timestamp}"
 
